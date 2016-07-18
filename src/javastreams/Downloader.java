@@ -40,7 +40,6 @@ public class Downloader implements Runnable {
     private final URL fileList;
     private final List<URL> files;
     private final File store;
-    private int bufferSize = 524288;
 
     private List<DownloaderListener> listeners;
 
@@ -62,10 +61,13 @@ public class Downloader implements Runnable {
     @Override
     public void run() {
         retrieveFiles();
+        
+        // USE TRHEAD POOL
 
         for (URL fileUrl : files) {
-//            System.out.println("Download: " + fileUrl);
-            downloadUrl(fileUrl);
+            DownloaderTask downloaderTask = new DownloaderTask(this, store, fileUrl);
+            Thread thread = new Thread(downloaderTask);
+            thread.start();
         }
     }
 
@@ -80,49 +82,15 @@ public class Downloader implements Runnable {
         }
     }
 
-    private void downloadUrl(URL sourceUrl) {
-        try {
-            URLConnection conn = sourceUrl.openConnection();
-            conn.getContentType();
+    public void downloadBegin(DownloaderTask task) {
 
-            URL targetUrl = conn.getURL();
+    }
 
-            long total = conn.getContentLengthLong();
-            long downloaded = 0;
+    public void downloadProgress(DownloaderTask task) {
 
-            String sourcefile = new File(targetUrl.getFile()).getName();
-            String filename = new String(sourcefile.getBytes("ISO-8859-1"), "UTF-8");
-            File targetFile = new File(store, URLDecoder.decode(filename, "UTF-8"));
+    }
 
-            try (BufferedInputStream bis = new BufferedInputStream(targetUrl.openStream());
-                    FileOutputStream fos = new FileOutputStream(targetFile)) {
-                byte[] buffer = new byte[bufferSize];
+    public void downloadComplete(DownloaderTask task) {
 
-                for (int read; (read = bis.read(buffer)) >= 0;) {
-                    fos.write(buffer, 0, read);
-                    fos.flush();
-
-                    downloaded += read;
-
-                    if (read > 0) {
-                        // [===============================>   ] 100.00%
-//                        String progress = "===>";
-//                        
-//                        System.out.printf("\r[%-70s] %6.02f%%", progress, (double) downloaded * 100. / total);
-                    }
-                }
-                System.out.println();
-            }
-
-            for (DownloaderListener listener : listeners) {
-                listener.downloadComplete(sourceUrl, targetFile);
-            }
-
-//            System.out.println("Downloaded: " + targetFile);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 }

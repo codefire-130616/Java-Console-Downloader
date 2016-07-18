@@ -16,9 +16,6 @@
  */
 package javastreams;
 
-import java.io.File;
-import java.net.URL;
-
 /**
  *
  * @author CodeFireUA <edu@codefire.com.ua>
@@ -26,8 +23,20 @@ import java.net.URL;
 public class DownloadHandler implements DownloaderListener {
 
     @Override
-    public void downloadComplete(URL source, File target) {
-        System.out.printf("File downloaded:\n  %s\n  %s\n\n", source, target);
+    public void downloadBegin(DownloaderTask task) {
+        // TODO: Burn your code here...
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void downloadProgress(DownloaderTask task) {
+        // TODO: Burn your code here...
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void downloadComplete(DownloaderTask task) {
+        System.out.printf("File downloaded:\n  %s\n  %s\n\n", task.getSource(), task.getTarget());
     }
 
 }

@@ -16,15 +16,16 @@
  */
 package javastreams;
 
-import java.io.File;
-import java.net.URL;
-
 /**
  *
  * @author CodeFireUA <edu@codefire.com.ua>
  */
 public interface DownloaderListener {
-    
-    public void downloadComplete(URL source, File target);
-    
+
+    public void downloadBegin(DownloaderTask task);
+
+    public void downloadProgress(DownloaderTask task);
+
+    public void downloadComplete(DownloaderTask task);
+
 }
