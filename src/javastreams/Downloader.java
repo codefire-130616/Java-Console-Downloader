@@ -35,13 +35,13 @@ import java.util.logging.Logger;
  *
  * @author CodeFireUA <edu@codefire.com.ua>
  */
-public class Downloader {
+public class Downloader implements Runnable {
 
     private final URL fileList;
     private final List<URL> files;
     private final File store;
     private int bufferSize = 524288;
-    
+
     private List<DownloaderListener> listeners;
 
     public Downloader(URL fileList, File store) {
@@ -59,7 +59,8 @@ public class Downloader {
         return listeners.remove(listener);
     }
 
-    public void download() {
+    @Override
+    public void run() {
         retrieveFiles();
 
         for (URL fileUrl : files) {
@@ -83,9 +84,9 @@ public class Downloader {
         try {
             URLConnection conn = sourceUrl.openConnection();
             conn.getContentType();
-            
+
             URL targetUrl = conn.getURL();
-            
+
             long total = conn.getContentLengthLong();
             long downloaded = 0;
 
@@ -112,11 +113,11 @@ public class Downloader {
                 }
                 System.out.println();
             }
-            
+
             for (DownloaderListener listener : listeners) {
                 listener.downloadComplete(sourceUrl, targetFile);
             }
-            
+
 //            System.out.println("Downloaded: " + targetFile);
         } catch (MalformedURLException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
