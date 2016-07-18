@@ -25,6 +25,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -40,18 +41,29 @@ public class Downloader {
     private final List<URL> files;
     private final File store;
     private int bufferSize = 524288;
+    
+    private List<DownloaderListener> listeners;
 
     public Downloader(URL fileList, File store) {
         this.fileList = fileList;
         this.store = store;
         this.files = new ArrayList<>();
+        this.listeners = Collections.synchronizedList(new ArrayList<DownloaderListener>());
+    }
+
+    public boolean add(DownloaderListener listener) {
+        return listeners.add(listener);
+    }
+
+    public boolean remove(DownloaderListener listener) {
+        return listeners.remove(listener);
     }
 
     public void download() {
         retrieveFiles();
 
         for (URL fileUrl : files) {
-            System.out.println("Download: " + fileUrl);
+//            System.out.println("Download: " + fileUrl);
             downloadUrl(fileUrl);
         }
     }
@@ -93,15 +105,19 @@ public class Downloader {
 
                     if (read > 0) {
                         // [===============================>   ] 100.00%
-                        String progress = "===>";
-                        
-                        System.out.printf("\r[%-70s] %6.02f%%", progress, (double) downloaded * 100. / total);
+//                        String progress = "===>";
+//                        
+//                        System.out.printf("\r[%-70s] %6.02f%%", progress, (double) downloaded * 100. / total);
                     }
                 }
                 System.out.println();
             }
             
-            System.out.println("Downloaded: " + targetFile);
+            for (DownloaderListener listener : listeners) {
+                listener.downloadComplete(sourceUrl, targetFile);
+            }
+            
+//            System.out.println("Downloaded: " + targetFile);
         } catch (MalformedURLException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

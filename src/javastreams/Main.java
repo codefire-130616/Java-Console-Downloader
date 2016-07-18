@@ -49,6 +49,7 @@ public class Main {
         
         try {
             Downloader downloader = new Downloader(new URL(resource), store);
+            downloader.add(new DownloadHandler());
             downloader.download();
         } catch (MalformedURLException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
